@@ -3,9 +3,9 @@ const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
 async function reviewExists(req, res, next) {
   const { reviewId } = req.params;
-  const foundReview = await service.read(reviewId);
-  if (foundReview) {
-    res.locals.review = foundReview;
+  const review = await service.read(reviewId);
+  if (review) {
+    res.locals.review = review;
     return next();
   }
   return next({
@@ -21,13 +21,33 @@ async function destroy(req, res, next) {
 
 async function list(req, res, next) {
     const { movieId } = req.params;
-  const result = await service.list(movieId);
-  res.json({ result });
+  const queryResult = await service.list(movieId);
+  res.json({ data: queryResult });
 }
 
 async function update(req, res, next) {
-  const { reviewId } = req.params;
-  res.json({ data: await service.update(reviewId) });
+  
+  const updatedReview = {
+    ...req.body.data,
+    review_id: res.locals.review.review_id,
+  };
+  const cr = await service.update(updatedReview);
+  //reorganize query result to match test needs
+  const data = {
+    "review_id": cr.review_id, 
+    "content": cr.content,
+    "score": cr.score,
+    "critic_id": cr.critic_id,
+    "movie_id": cr.movie_id,
+    "created_at": cr.critic.created_at,
+    "updated_at": cr.critic.updated_at,
+    "critic": {
+      "preferred_name": cr.critic.preferred_name,
+      "surname": cr.critic.surname,
+      "organization_name": cr.critic.organization_name,
+    }
+  };
+  res.json({ data: data });
 }
 
 module.exports = {
@@ -35,3 +55,5 @@ module.exports = {
   list: asyncErrorBoundary(list),
   update: [asyncErrorBoundary(reviewExists), asyncErrorBoundary(update)],
 };
+
+
