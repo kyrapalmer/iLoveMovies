@@ -4,7 +4,7 @@ const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 //LIST
 async function list(req, res, next) {
   const queryResult = await service.list(req.query.is_showing);
-  res.json({ queryResult });
+  res.json({ data: queryResult });
 }
 
 //READ

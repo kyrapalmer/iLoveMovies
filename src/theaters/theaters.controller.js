@@ -6,13 +6,13 @@ async function list(req, res, next) {
     const { movieId } = req.params;
     if (movieId === undefined) {
         const theaters = await service.list();
-        const dataArray = theaters.map(async (theater) => {
+        const theatersMap = theaters.map(async (theater) => {
             return { ...theater, movies: await service.getMovies(theater) };
         });
-        const data = Promise.all(dataArray);
-        res.json({ data });
+        const data = await Promise.all(theatersMap);
+        res.json({ data: data });
     } else {
-        const movie_id = Number(movieId);
+        const movie_id = movieId;
         const theaters = await service.listMovieById(movie_id);
         res.json({ data: theaters });
     }
